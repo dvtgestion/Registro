@@ -1,0 +1,1502 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Registro y Búsqueda de Piezas</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#111a2e;
+      --card2:#0f1730;
+      --muted:#98a2b3;
+      --text:#e6eaf2;
+      --line:#24304a;
+      --accent:#6ea8fe;
+      --danger:#ff6b6b;
+      --ok:#4dd4ac;
+      --warn:#ffd166;
+      --shadow: 0 12px 40px rgba(0,0,0,.35);
+      --radius: 14px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(110,168,254,.18), transparent 55%),
+                  radial-gradient(900px 500px at 90% 0%, rgba(77,212,172,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit}
+    .wrap{max-width:1200px;margin:0 auto;padding:18px}
+    header{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding:14px 16px; background: rgba(17,26,46,.72); border:1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      position: sticky; top: 12px; z-index: 5; backdrop-filter: blur(8px);
+    }
+    .brand{
+      display:flex; gap:12px; align-items:center;
+    }
+    .logo{
+      width:38px;height:38px;border-radius:12px;
+      background: linear-gradient(135deg, rgba(110,168,254,.95), rgba(77,212,172,.9));
+      box-shadow: 0 10px 30px rgba(110,168,254,.18);
+    }
+    .brand h1{font-size:15px;margin:0;letter-spacing:.2px}
+    .brand p{margin:0;color:var(--muted);font-size:12px}
+    .top-actions{display:flex; gap:10px; align-items:center}
+    .pill{
+      font-size:12px;color:var(--muted);border:1px solid var(--line);
+      padding:6px 10px;border-radius:999px;background: rgba(15,23,48,.65);
+      max-width: 320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    button, input, select, textarea{
+      font:inherit; color:inherit;
+    }
+    button{
+      border:1px solid var(--line);
+      background: rgba(15,23,48,.85);
+      padding:10px 12px; border-radius:12px; cursor:pointer;
+      transition: transform .06s ease, border-color .12s ease, background .12s ease;
+    }
+    button:hover{border-color: rgba(110,168,254,.55)}
+    button:active{transform: translateY(1px)}
+    button.primary{
+      background: linear-gradient(135deg, rgba(110,168,254,.92), rgba(77,212,172,.88));
+      color:#06101f; border-color: transparent; font-weight: 700;
+    }
+    button.danger{
+      background: rgba(255,107,107,.14);
+      border-color: rgba(255,107,107,.35);
+      color: #ffd7d7;
+    }
+    button.ghost{
+      background: transparent;
+    }
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .grid{
+      display:grid; grid-template-columns: 1fr 1.25fr; gap:14px; margin-top:14px;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+      header{position: static}
+    }
+    .card{
+      background: rgba(17,26,46,.72);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .hd{
+      padding:14px 16px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      border-bottom: 1px solid rgba(36,48,74,.7);
+      background: rgba(15,23,48,.55);
+    }
+    .card .hd h2{margin:0;font-size:14px}
+    .card .hd small{color:var(--muted)}
+    .card .bd{padding:14px 16px}
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .field{flex:1; min-width:220px}
+    label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px}
+    input, select, textarea{
+      width:100%;
+      border:1px solid rgba(36,48,74,.95);
+      background: rgba(15,23,48,.75);
+      padding:10px 10px;
+      border-radius:12px;
+      outline:none;
+    }
+    input:focus, select:focus, textarea:focus{
+      border-color: rgba(110,168,254,.6);
+      box-shadow: 0 0 0 4px rgba(110,168,254,.12);
+    }
+    textarea{min-height: 92px; resize: vertical}
+    .muted{color:var(--muted); font-size:12px}
+    .sep{height:1px;background:rgba(36,48,74,.7); margin:12px 0}
+    .toggle{
+      display:flex; gap:10px; align-items:center; padding:10px 12px;
+      border:1px solid rgba(36,48,74,.9); border-radius:12px; background: rgba(15,23,48,.65);
+    }
+    .toggle input{width:auto; margin:0}
+    .checklist{
+      display:flex; flex-wrap:wrap; gap:8px;
+      padding:10px; border:1px solid rgba(36,48,74,.9); border-radius:12px;
+      background: rgba(15,23,48,.65);
+      max-height: 160px; overflow:auto;
+    }
+    .check{
+      display:flex; align-items:center; gap:8px;
+      border:1px solid rgba(36,48,74,.85);
+      padding:6px 10px; border-radius:999px;
+      background: rgba(17,26,46,.55);
+      font-size:12px;
+      user-select:none;
+    }
+    .check input{width:auto;margin:0}
+    .inline{
+      display:flex; gap:8px; align-items:center;
+    }
+    .inline input{flex:1}
+    .hint{
+      font-size:12px; color:var(--muted); margin-top:8px; line-height: 1.35;
+    }
+    .msg{
+      margin-top:10px; padding:10px 12px; border-radius:12px;
+      border:1px solid rgba(36,48,74,.85); background: rgba(15,23,48,.55);
+      font-size:12px; color: var(--muted);
+    }
+    .msg.ok{border-color: rgba(77,212,172,.35); color:#c8fff1; background: rgba(77,212,172,.10)}
+    .msg.err{border-color: rgba(255,107,107,.35); color:#ffd7d7; background: rgba(255,107,107,.12)}
+    .msg.warn{border-color: rgba(255,209,102,.35); color:#fff1c7; background: rgba(255,209,102,.10)}
+    table{
+      width:100%; border-collapse:collapse; font-size:13px;
+    }
+    th, td{
+      text-align:left; padding:10px 8px; border-bottom:1px solid rgba(36,48,74,.7);
+      vertical-align: top;
+    }
+    th{color:var(--muted); font-weight:600; font-size:12px}
+    td .sub{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+    .actions{display:flex; gap:8px; flex-wrap:wrap}
+    .badge{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:3px 8px; border-radius:999px; font-size:12px;
+      border:1px solid rgba(36,48,74,.85); background: rgba(15,23,48,.55);
+      color: var(--text);
+      margin: 2px 6px 2px 0;
+    }
+    .badge.ok{border-color: rgba(77,212,172,.35); background: rgba(77,212,172,.10)}
+    .badge.warn{border-color: rgba(255,209,102,.35); background: rgba(255,209,102,.10)}
+    .badge.dim{color:var(--muted)}
+    .right-tools{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end;
+    }
+    .footer-tools{display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; margin-top:10px}
+    .kpi{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .kpi span{color:var(--muted); font-size:12px}
+    .kpi strong{font-size:12px}
+    .overlay{
+      position:fixed; inset:0; background: rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center;
+      padding:18px; z-index: 50;
+    }
+    .modal{
+      width:min(860px, 96vw);
+      background: rgba(17,26,46,.92);
+      border:1px solid rgba(36,48,74,.9);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .modal .hd{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid rgba(36,48,74,.7)}
+    .modal .bd{padding:14px 16px}
+    .two-col{display:grid; grid-template-columns: 1fr 1fr; gap:12px}
+    @media (max-width: 760px){ .two-col{grid-template-columns:1fr} }
+    .kv{padding:10px 12px; border:1px solid rgba(36,48,74,.85); border-radius:12px; background: rgba(15,23,48,.6)}
+    .kv b{display:block; font-size:12px; color:var(--muted); margin-bottom:4px}
+    .kv div{font-size:13px; line-height:1.35}
+    .hidden{display:none !important}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Registro y Búsqueda de Piezas</h1>
+          <p>Appwrite + Vercel (un solo HTML)</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="pill" id="pillStatus">Conectando…</div>
+        <button class="ghost" id="btnSync" title="Refrescar lista">Sincronizar</button>
+        <button class="danger hidden" id="btnLogout">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <!-- AUTENTICACIÓN -->
+    <section class="card" id="authCard" style="margin-top:14px;">
+      <div class="hd">
+        <div>
+          <h2>Acceso</h2>
+          <small>Inicia sesión o crea una cuenta para usar el sistema.</small>
+        </div>
+        <small id="authHint" class="muted"></small>
+      </div>
+      <div class="bd">
+        <div class="row">
+          <div class="field">
+            <label>Correo</label>
+            <input id="authEmail" type="email" placeholder="correo@ejemplo.com" autocomplete="email">
+          </div>
+          <div class="field">
+            <label>Contraseña</label>
+            <input id="authPass" type="password" placeholder="mín. 8 caracteres" autocomplete="current-password">
+          </div>
+          <div class="field">
+            <label>Nombre (solo al registrarse)</label>
+            <input id="authName" type="text" placeholder="Opcional">
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="row" style="justify-content:flex-end">
+          <button id="btnLogin" class="primary">Iniciar sesión</button>
+          <button id="btnSignup">Crear cuenta</button>
+        </div>
+        <div id="authMsg" class="msg hidden"></div>
+        <div class="hint">
+          Nota: si vas a usar Vercel, recuerda agregar tu dominio como plataforma Web en Appwrite para evitar CORS.  [oai_citation:4‡Appwrite](https://appwrite.io/docs/quick-starts/web)
+        </div>
+      </div>
+    </section>
+
+    <!-- APP -->
+    <section class="grid hidden" id="appGrid">
+
+      <!-- FORMULARIO -->
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2 id="formTitle">Registrar pieza</h2>
+            <small id="formSub" class="muted">Todos los campos son opcionales.</small>
+          </div>
+          <div class="right-tools">
+            <button id="btnClearForm" class="ghost">Limpiar</button>
+            <button id="btnSave" class="primary">Guardar</button>
+          </div>
+        </div>
+
+        <div class="bd">
+          <input type="hidden" id="editingRowId" value="">
+          <input type="hidden" id="editingFechaRegistro" value="">
+
+          <div class="row">
+            <div class="field">
+              <label>Empresa fuente (quién dio la información)</label>
+              <input id="fEmpresa" type="text" placeholder="Ej: Proveedor X, Distribuidor Y">
+            </div>
+            <div class="field">
+              <label>Código de la pieza</label>
+              <input id="fCodigo" type="text" placeholder="Ej: 55201-AB123">
+            </div>
+            <div class="field">
+              <label>Nombre de la pieza</label>
+              <input id="fNombre" type="text" placeholder="Ej: Kit de embrague">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label>Categoría</label>
+              <select id="fCategoria">
+                <option value="">(Sin categoría)</option>
+                <option>Motor</option>
+                <option>Suspensión</option>
+                <option>Frenos</option>
+                <option>Dirección</option>
+                <option>Eléctrico</option>
+                <option>Transmisión</option>
+                <option>Enfriamiento</option>
+                <option>Carrocería</option>
+                <option>Filtros</option>
+                <option>Otros</option>
+              </select>
+              <div class="hint">Puedes cambiarlo después o dejarlo vacío.</div>
+            </div>
+
+            <div class="field">
+              <label>Costo</label>
+              <input id="fCosto" type="number" step="0.01" placeholder="Opcional">
+            </div>
+
+            <div class="field">
+              <label>Precio sugerido</label>
+              <input id="fPrecio" type="number" step="0.01" placeholder="Opcional">
+              <div class="hint" id="hintMargen"></div>
+            </div>
+
+            <div class="field">
+              <label>Moneda</label>
+              <select id="fMoneda">
+                <option value="">(Sin moneda)</option>
+                <option>BOB</option>
+                <option>USD</option>
+                <option>BRL</option>
+                <option>ARS</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="row">
+            <div class="field" style="min-width:260px">
+              <div class="toggle">
+                <input id="fMultiMarcas" type="checkbox">
+                <div>
+                  <div style="font-weight:650">MultiMarcas</div>
+                  <div class="muted">Úsalo cuando la pieza sea muy universal.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Marcas de vehículo (puedes seleccionar varias)</label>
+              <div class="checklist" id="brandsList"></div>
+              <div class="inline" style="margin-top:8px">
+                <input id="brandCustom" type="text" placeholder="Agregar marca personalizada (ej: Jeep)">
+                <button id="btnAddBrand">Agregar</button>
+              </div>
+              <div class="hint">Si marcas MultiMarcas, las marcas se desactivan.</div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <div class="field">
+              <label>Clases de vehículo (puedes seleccionar varias)</label>
+              <div class="checklist" id="classesList"></div>
+              <div class="inline" style="margin-top:8px">
+                <input id="classCustom" type="text" placeholder="Agregar clase personalizada (ej: Furgón)">
+                <button id="btnAddClass">Agregar</button>
+              </div>
+              <div class="hint">Ejemplos: Hatchback, Sedán, SUV, Pickup, Van…</div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <div class="field" style="min-width:100%">
+              <label>Compatibilidad detallada (modelos por marca)</label>
+              <textarea id="fCompat" placeholder="Ej: Fiat Uno, Fiat Strada, Chevrolet Onix, Volkswagen Gol…"></textarea>
+              <div class="hint">Aquí puedes escribir todos los modelos y detalles que quieras, aunque falten marcas/clases.</div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <div class="field" style="min-width:100%">
+              <label>Notas</label>
+              <textarea id="fNotas" placeholder="Cualquier detalle adicional (referencias, equivalencias, observaciones, etc.)"></textarea>
+            </div>
+          </div>
+
+          <div id="formMsg" class="msg hidden"></div>
+        </div>
+      </div>
+
+      <!-- BÚSQUEDA + RESULTADOS -->
+      <div class="card">
+        <div class="hd">
+          <div>
+            <h2>Búsqueda</h2>
+            <small class="muted">Búsqueda rápida (con debounce) + filtros.</small>
+          </div>
+          <div class="right-tools">
+            <button id="btnClearFilters" class="ghost">Limpiar filtros</button>
+            <button id="btnSearch" class="primary">Buscar</button>
+          </div>
+        </div>
+
+        <div class="bd">
+          <div class="row">
+            <div class="field" style="min-width:280px">
+              <label>Búsqueda general</label>
+              <input id="qText" type="text" placeholder="Código, nombre, compatibilidad, empresa…">
+              <div class="hint">Consejo: crea índices full-text para que el search sea instantáneo.  [oai_citation:5‡Appwrite](https://appwrite.io/docs/products/databases/queries)</div>
+            </div>
+
+            <div class="field">
+              <label>Empresa fuente (contiene)</label>
+              <input id="qEmpresa" type="text" placeholder="Ej: Proveedor X">
+            </div>
+
+            <div class="field">
+              <label>Categoría</label>
+              <select id="qCategoria">
+                <option value="">(Cualquiera)</option>
+                <option>Motor</option>
+                <option>Suspensión</option>
+                <option>Frenos</option>
+                <option>Dirección</option>
+                <option>Eléctrico</option>
+                <option>Transmisión</option>
+                <option>Enfriamiento</option>
+                <option>Carrocería</option>
+                <option>Filtros</option>
+                <option>Otros</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <div class="field">
+              <label>Marcas (filtro)</label>
+              <div class="checklist" id="brandsFilter"></div>
+              <div class="toggle" style="margin-top:8px">
+                <input id="qIncludeMulti" type="checkbox" checked>
+                <div>
+                  <div style="font-weight:650">Incluir MultiMarcas</div>
+                  <div class="muted">Si filtras por marca, también traerá piezas universales.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Clases (filtro)</label>
+              <div class="checklist" id="classesFilter"></div>
+              <div class="toggle" style="margin-top:8px">
+                <input id="qOnlyMulti" type="checkbox">
+                <div>
+                  <div style="font-weight:650">Solo MultiMarcas</div>
+                  <div class="muted">Trae únicamente piezas marcadas como universales.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <div class="field">
+              <label>Precio (rango)</label>
+              <div class="row">
+                <div class="field" style="min-width:140px">
+                  <input id="qMinPrice" type="number" step="0.01" placeholder="Mín">
+                </div>
+                <div class="field" style="min-width:140px">
+                  <input id="qMaxPrice" type="number" step="0.01" placeholder="Máx">
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Fecha de registro (rango)</label>
+              <div class="row">
+                <div class="field" style="min-width:160px">
+                  <input id="qFromDate" type="date">
+                </div>
+                <div class="field" style="min-width:160px">
+                  <input id="qToDate" type="date">
+                </div>
+              </div>
+              <div class="hint">Se filtra usando <code>fechaRegistro</code> (ISO) guardada en cada registro.</div>
+            </div>
+          </div>
+
+          <div id="listMsg" class="msg hidden"></div>
+
+          <div class="sep"></div>
+
+          <div style="overflow:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Código / Nombre</th>
+                  <th>Marcas / Clases</th>
+                  <th>Precio</th>
+                  <th>Empresa</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="rowsTbody">
+                <tr><td colspan="6" class="muted">Sin datos todavía.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="footer-tools">
+            <div class="kpi">
+              <span>Mostrando:</span> <strong id="kpiCount">0</strong>
+              <span>Cursor:</span> <strong id="kpiCursor">—</strong>
+            </div>
+            <div class="actions">
+              <button id="btnMore">Cargar más</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </div>
+
+  <!-- MODAL -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="hd">
+        <div>
+          <div style="font-weight:800" id="mTitle">Detalle</div>
+          <div class="muted" id="mSub"></div>
+        </div>
+        <div class="actions">
+          <button id="btnEditFromModal">Editar</button>
+          <button class="ghost" id="btnCloseModal">Cerrar</button>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="two-col" id="mBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Appwrite SDK (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@17.0.0"></script> <!--  [oai_citation:6‡Appwrite](https://appwrite.io/docs/quick-starts/web) -->
+  <script>
+  'use strict';
+
+  /***********************
+   * CONFIGURACIÓN (EDITA)
+   ***********************/
+  const APPWRITE_ENDPOINT   = 'https://<REGION>.cloud.appwrite.io/v1'; // Ej: https://fra.cloud.appwrite.io/v1  (o tu self-host /v1)
+  const APPWRITE_PROJECT_ID = '<PROJECT_ID>';
+  const APPWRITE_DATABASE_ID = '<DATABASE_ID>';
+  const APPWRITE_TABLE_ID    = '<TABLE_ID>'; // Tabla (Table) donde guardas las piezas
+
+  const PAGE_SIZE = 50;
+
+  /***********************
+   * LISTAS BASE (EDITABLES)
+   ***********************/
+  const DEFAULT_BRANDS = [
+    'Chevrolet','Fiat','Volkswagen','Toyota','Nissan','Hyundai','Kia','Ford','Honda',
+    'Renault','Peugeot','Citroën','Jeep','Ram','Chery','Suzuki','Mitsubishi','BMW','Mercedes-Benz'
+  ];
+
+  const DEFAULT_CLASSES = [
+    'Hatchback','Sedán','SUV','Pickup','Van/Furgón','Camión','Motocicleta','Utilitario','Crossover'
+  ];
+
+  /***********************
+   * UTILIDADES UI
+   ***********************/
+  const $ = (sel, el=document) => el.querySelector(sel);
+  const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+  function setPill(text, kind='') {
+    const pill = $('#pillStatus');
+    pill.textContent = text;
+    pill.style.borderColor =
+      kind==='ok'   ? 'rgba(77,212,172,.35)' :
+      kind==='err'  ? 'rgba(255,107,107,.35)' :
+      kind==='warn' ? 'rgba(255,209,102,.35)' : 'rgba(36,48,74,.85)';
+  }
+
+  function showMsg(el, text, kind='') {
+    el.classList.remove('hidden','ok','err','warn');
+    el.textContent = text;
+    if (kind) el.classList.add(kind);
+  }
+  function hideMsg(el){ el.classList.add('hidden'); el.textContent=''; el.classList.remove('ok','err','warn'); }
+
+  function debounce(fn, ms=350){
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), ms);
+    };
+  }
+
+  function normalizeStr(s){
+    return (s ?? '')
+      .toString()
+      .trim();
+  }
+
+  function toNumberOrNull(v){
+    const s = normalizeStr(v);
+    if (!s) return null;
+    const n = Number(s);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function isoNow(){
+    return new Date().toISOString();
+  }
+
+  function dateToIsoStart(yyyyMmDd){
+    if (!yyyyMmDd) return null;
+    const d = new Date(yyyyMmDd + 'T00:00:00.000Z');
+    return d.toISOString();
+  }
+  function dateToIsoEnd(yyyyMmDd){
+    if (!yyyyMmDd) return null;
+    const d = new Date(yyyyMmDd + 'T23:59:59.999Z');
+    return d.toISOString();
+  }
+
+  function uniq(arr){
+    return Array.from(new Set(arr));
+  }
+
+  function safeLower(s){ return (s ?? '').toString().toLowerCase(); }
+
+  async function copyToClipboard(text){
+    try{
+      await navigator.clipboard.writeText(text);
+      return true;
+    }catch{
+      return false;
+    }
+  }
+
+  /***********************
+   * APPWRITE (SDK)
+   ***********************/
+  const client = new Appwrite.Client()
+    .setEndpoint(APPWRITE_ENDPOINT)
+    .setProject(APPWRITE_PROJECT_ID); //  [oai_citation:7‡Appwrite](https://appwrite.io/docs/quick-starts/web)
+
+  const account = new Appwrite.Account(client);
+  const tablesDB = new Appwrite.TablesDB(client);
+  const Query = Appwrite.Query;
+  const ID = Appwrite.ID;
+
+  /***********************
+   * ESTADO
+   ***********************/
+  const state = {
+    user: null,
+    brands: loadLocalList('brands', DEFAULT_BRANDS),
+    classes: loadLocalList('classes', DEFAULT_CLASSES),
+    lastRows: [],
+    cursorAfter: null,
+    lastModalRow: null,
+    loading: false,
+    searchFallbackToContains: false, // si falta full-text index
+  };
+
+  function loadLocalList(key, fallback){
+    try{
+      const raw = localStorage.getItem('parts_' + key);
+      if (!raw) return [...fallback];
+      const arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return [...fallback];
+      return uniq([...fallback, ...arr].map(normalizeStr).filter(Boolean));
+    }catch{
+      return [...fallback];
+    }
+  }
+
+  function saveLocalList(key, list){
+    try{
+      localStorage.setItem('parts_' + key, JSON.stringify(uniq(list)));
+    }catch{}
+  }
+
+  /***********************
+   * RENDER CHECKLISTS
+   ***********************/
+  function renderChecklist(container, items, selectedSet, disabled=false){
+    container.innerHTML = '';
+    items.forEach(item => {
+      const id = container.id + '_' + safeLower(item).replace(/[^a-z0-9]+/g,'_');
+      const wrap = document.createElement('label');
+      wrap.className = 'check';
+      wrap.innerHTML = `
+        <input type="checkbox" ${selectedSet.has(item) ? 'checked' : ''} ${disabled ? 'disabled' : ''} data-value="${escapeHtml(item)}" />
+        <span>${escapeHtml(item)}</span>
+      `;
+      container.appendChild(wrap);
+    });
+  }
+
+  function getSelectedFrom(container){
+    return $$('#' + container.id + ' input[type="checkbox"]', container)
+      .filter(i => i.checked)
+      .map(i => i.getAttribute('data-value'))
+      .filter(Boolean);
+  }
+
+  function escapeHtml(str){
+    return (str ?? '').toString()
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'","&#039;");
+  }
+
+  /***********************
+   * FORM: GET/SET
+   ***********************/
+  function resetForm(){
+    $('#editingRowId').value = '';
+    $('#editingFechaRegistro').value = '';
+    $('#fEmpresa').value = '';
+    $('#fCodigo').value = '';
+    $('#fNombre').value = '';
+    $('#fCategoria').value = '';
+    $('#fCosto').value = '';
+    $('#fPrecio').value = '';
+    $('#fMoneda').value = '';
+    $('#fMultiMarcas').checked = false;
+    $('#fCompat').value = '';
+    $('#fNotas').value = '';
+
+    // desmarcar checklists
+    $$('#brandsList input[type="checkbox"]').forEach(i => i.checked = false);
+    $$('#classesList input[type="checkbox"]').forEach(i => i.checked = false);
+
+    updateFormModeUI();
+    hideMsg($('#formMsg'));
+    updateMargenHint();
+  }
+
+  function updateFormModeUI(){
+    const isEdit = !!normalizeStr($('#editingRowId').value);
+    $('#formTitle').textContent = isEdit ? 'Editar pieza' : 'Registrar pieza';
+    $('#btnSave').textContent = isEdit ? 'Actualizar' : 'Guardar';
+    $('#formSub').textContent = isEdit ? 'Editando un registro existente (todos los campos siguen siendo opcionales).' : 'Todos los campos son opcionales.';
+  }
+
+  function fillFormFromRow(row){
+    $('#editingRowId').value = row.$id || '';
+    $('#editingFechaRegistro').value = row.fechaRegistro || '';
+
+    $('#fEmpresa').value = row.empresaFuente ?? '';
+    $('#fCodigo').value = row.codigo ?? '';
+    $('#fNombre').value = row.nombre ?? '';
+    $('#fCategoria').value = row.categoria ?? '';
+    $('#fCosto').value = row.costo ?? '';
+    $('#fPrecio').value = row.precio ?? '';
+    $('#fMoneda').value = row.moneda ?? '';
+    $('#fMultiMarcas').checked = !!row.multiMarcas;
+    $('#fCompat').value = row.compatibilidad ?? '';
+    $('#fNotas').value = row.notas ?? '';
+
+    // Asegurar listas incluyan valores custom
+    const marcas = Array.isArray(row.marcas) ? row.marcas : [];
+    const clases = Array.isArray(row.clases) ? row.clases : [];
+    marcas.forEach(m => { if (m && !state.brands.includes(m)) state.brands.push(m); });
+    clases.forEach(c => { if (c && !state.classes.includes(c)) state.classes.push(c); });
+    state.brands = uniq(state.brands);
+    state.classes = uniq(state.classes);
+    saveLocalList('brands', state.brands);
+    saveLocalList('classes', state.classes);
+
+    // marcar checklists
+    const marcasSet = new Set(marcas);
+    const clasesSet = new Set(clases);
+
+    renderAllChecklists(); // re-render para que existan custom values
+    $$('#brandsList input[type="checkbox"]').forEach(i => {
+      const v = i.getAttribute('data-value');
+      i.checked = marcasSet.has(v);
+    });
+    $$('#classesList input[type="checkbox"]').forEach(i => {
+      const v = i.getAttribute('data-value');
+      i.checked = clasesSet.has(v);
+    });
+
+    updateMultiMarcasDisabling();
+    updateFormModeUI();
+    updateMargenHint();
+  }
+
+  function getFormData(){
+    const isEdit = !!normalizeStr($('#editingRowId').value);
+
+    const multi = $('#fMultiMarcas').checked;
+    const marcasSel = multi ? [] : getSelectedFrom($('#brandsList'));
+    const clasesSel = getSelectedFrom($('#classesList'));
+
+    const costo = toNumberOrNull($('#fCosto').value);
+    const precio = toNumberOrNull($('#fPrecio').value);
+
+    // Si editamos, conservamos fechaRegistro si ya existía
+    const fechaRegistro = isEdit
+      ? (normalizeStr($('#editingFechaRegistro').value) || isoNow())
+      : isoNow();
+
+    return {
+      empresaFuente: normalizeStr($('#fEmpresa').value) || null,
+      codigo: normalizeStr($('#fCodigo').value) || null,
+      nombre: normalizeStr($('#fNombre').value) || null,
+      categoria: normalizeStr($('#fCategoria').value) || null,
+      costo,
+      precio,
+      moneda: normalizeStr($('#fMoneda').value) || null,
+      multiMarcas: !!multi,
+      marcas: marcasSel,
+      clases: clasesSel,
+      compatibilidad: normalizeStr($('#fCompat').value) || null,
+      notas: normalizeStr($('#fNotas').value) || null,
+      fechaRegistro
+    };
+  }
+
+  function updateMargenHint(){
+    const costo = toNumberOrNull($('#fCosto').value);
+    const precio = toNumberOrNull($('#fPrecio').value);
+    const el = $('#hintMargen');
+    if (costo == null || precio == null || costo <= 0){
+      el.textContent = '';
+      return;
+    }
+    const margen = ((precio - costo) / costo) * 100;
+    const sign = margen >= 0 ? '+' : '';
+    el.textContent = `Margen aproximado: ${sign}${margen.toFixed(2)}%`;
+  }
+
+  function updateMultiMarcasDisabling(){
+    const multi = $('#fMultiMarcas').checked;
+    // re-render para aplicar disabled y mantener selected
+    const selected = new Set(getSelectedFrom($('#brandsList')));
+    renderChecklist($('#brandsList'), state.brands, selected, multi);
+  }
+
+  /***********************
+   * FILTROS: GET/SET
+   ***********************/
+  function resetFilters(){
+    $('#qText').value = '';
+    $('#qEmpresa').value = '';
+    $('#qCategoria').value = '';
+    $('#qMinPrice').value = '';
+    $('#qMaxPrice').value = '';
+    $('#qFromDate').value = '';
+    $('#qToDate').value = '';
+    $('#qOnlyMulti').checked = false;
+    $('#qIncludeMulti').checked = true;
+
+    $$('#brandsFilter input[type="checkbox"]').forEach(i => i.checked = false);
+    $$('#classesFilter input[type="checkbox"]').forEach(i => i.checked = false);
+
+    state.cursorAfter = null;
+    $('#kpiCursor').textContent = '—';
+  }
+
+  function getFilters(){
+    return {
+      text: normalizeStr($('#qText').value),
+      empresa: normalizeStr($('#qEmpresa').value),
+      categoria: normalizeStr($('#qCategoria').value),
+      marcas: getSelectedFrom($('#brandsFilter')),
+      clases: getSelectedFrom($('#classesFilter')),
+      onlyMulti: $('#qOnlyMulti').checked,
+      includeMulti: $('#qIncludeMulti').checked,
+      minPrice: toNumberOrNull($('#qMinPrice').value),
+      maxPrice: toNumberOrNull($('#qMaxPrice').value),
+      fromDate: $('#qFromDate').value,
+      toDate: $('#qToDate').value,
+    };
+  }
+
+  /***********************
+   * CHECKLISTS: RENDER ALL
+   ***********************/
+  function renderAllChecklists(){
+    // Form
+    renderChecklist($('#brandsList'), state.brands, new Set(getSelectedFrom($('#brandsList'))), $('#fMultiMarcas').checked);
+    renderChecklist($('#classesList'), state.classes, new Set(getSelectedFrom($('#classesList'))), false);
+
+    // Filters
+    renderChecklist($('#brandsFilter'), state.brands, new Set(getSelectedFrom($('#brandsFilter'))), false);
+    renderChecklist($('#classesFilter'), state.classes, new Set(getSelectedFrom($('#classesFilter'))), false);
+  }
+
+  /***********************
+   * CRUD: APPWRITE
+   ***********************/
+  async function saveRow(){
+    const msg = $('#formMsg');
+    hideMsg(msg);
+
+    const editingId = normalizeStr($('#editingRowId').value);
+    const data = getFormData();
+
+    // Limpieza: Appwrite acepta null/arrays, pero evitamos strings vacíos
+    // (si prefieres strings vacíos, quita este bloque)
+    Object.keys(data).forEach(k => {
+      if (data[k] === '') data[k] = null;
+    });
+
+    try{
+      setLoading(true);
+
+      if (editingId){
+        // Update row (PATCH)  [oai_citation:8‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/tablesDB)
+        await tablesDB.updateRow({
+          databaseId: APPWRITE_DATABASE_ID,
+          tableId: APPWRITE_TABLE_ID,
+          rowId: editingId,
+          data
+        });
+        showMsg(msg, 'Registro actualizado correctamente.', 'ok');
+      } else {
+        // Create row  [oai_citation:9‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/tablesDB)
+        await tablesDB.createRow({
+          databaseId: APPWRITE_DATABASE_ID,
+          tableId: APPWRITE_TABLE_ID,
+          rowId: ID.unique(),
+          data
+        });
+        showMsg(msg, 'Registro guardado correctamente.', 'ok');
+      }
+
+      // refrescar lista
+      await runSearch({ reset: true });
+      // limpiar form
+      resetForm();
+
+    }catch(err){
+      showMsg(msg, explainError(err), 'err');
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  async function deleteRow(rowId){
+    if (!confirm('¿Eliminar este registro?')) return;
+    try{
+      setLoading(true);
+      // Delete row  [oai_citation:10‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/tablesDB)
+      await tablesDB.deleteRow({
+        databaseId: APPWRITE_DATABASE_ID,
+        tableId: APPWRITE_TABLE_ID,
+        rowId
+      });
+      showMsg($('#listMsg'), 'Registro eliminado.', 'ok');
+      await runSearch({ reset: true });
+    }catch(err){
+      showMsg($('#listMsg'), explainError(err), 'err');
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  function buildTextQuery(term){
+    // Si hay índices full-text, Query.search es ideal (requiere full-text index).
+    // Si no hay índices, hacemos fallback a Query.contains.
+    if (!term) return null;
+
+    const t = term.trim();
+    if (!t) return null;
+
+    if (state.searchFallbackToContains){
+      return Query.or([
+        Query.contains('codigo', t),
+        Query.contains('nombre', t),
+        Query.contains('compatibilidad', t),
+        Query.contains('empresaFuente', t),
+      ]);
+    }
+
+    // Preferido: search en campos principales (necesita full-text index)
+    // Query.or acepta array de strings (queries) (firma vista en query.d.ts).
+    return Query.or([
+      Query.search('codigo', t),
+      Query.search('nombre', t),
+      Query.search('compatibilidad', t),
+      Query.search('empresaFuente', t),
+    ]);
+  }
+
+  function buildOrContainsArray(attribute, values){
+    // Para arrays: contains(attribute, [valor]) y or([...]) para "cualquiera"
+    if (!values || !values.length) return null;
+    const queries = values.map(v => Query.contains(attribute, [v]));
+    return Query.or(queries);
+  }
+
+  async function runSearch({ reset = false, append = false } = {}){
+    const listMsg = $('#listMsg');
+    hideMsg(listMsg);
+
+    if (reset){
+      state.cursorAfter = null;
+      $('#kpiCursor').textContent = '—';
+    }
+
+    const f = getFilters();
+
+    // base queries
+    const queries = [
+      Query.orderDesc('$createdAt'),
+      Query.limit(PAGE_SIZE),
+    ];
+
+    if (state.cursorAfter && append){
+      queries.push(Query.cursorAfter(state.cursorAfter));
+    }
+
+    // TEXT
+    const textQ = buildTextQuery(f.text);
+    if (textQ) queries.push(textQ);
+
+    // Empresa contiene
+    if (f.empresa) queries.push(Query.contains('empresaFuente', f.empresa));
+
+    // Categoría exacta
+    if (f.categoria) queries.push(Query.equal('categoria', f.categoria));
+
+    // MultiMarcas
+    if (f.onlyMulti){
+      queries.push(Query.equal('multiMarcas', true));
+    }
+
+    // Marcas (OR) + incluir MultiMarcas (opcional)
+    const marcasQ = buildOrContainsArray('marcas', f.marcas);
+    if (marcasQ && f.includeMulti && !f.onlyMulti){
+      queries.push(Query.or([marcasQ, Query.equal('multiMarcas', true)]));
+    } else if (marcasQ){
+      queries.push(marcasQ);
+    }
+
+    // Clases (OR)
+    const clasesQ = buildOrContainsArray('clases', f.clases);
+    if (clasesQ) queries.push(clasesQ);
+
+    // Precio
+    if (f.minPrice != null) queries.push(Query.greaterThanEqual('precio', f.minPrice));
+    if (f.maxPrice != null) queries.push(Query.lessThanEqual('precio', f.maxPrice));
+
+    // Fecha (usamos fechaRegistro ISO y between)
+    const fromIso = dateToIsoStart(f.fromDate);
+    const toIso = dateToIsoEnd(f.toDate);
+    if (fromIso && toIso) queries.push(Query.between('fechaRegistro', fromIso, toIso));
+    else if (fromIso && !toIso) queries.push(Query.greaterThanEqual('fechaRegistro', fromIso));
+    else if (!fromIso && toIso) queries.push(Query.lessThanEqual('fechaRegistro', toIso));
+
+    try{
+      setLoading(true);
+
+      const res = await tablesDB.listRows({
+        databaseId: APPWRITE_DATABASE_ID,
+        tableId: APPWRITE_TABLE_ID,
+        queries,
+        total: false
+      }); //  [oai_citation:11‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/tablesDB)
+
+      const rows = Array.isArray(res.rows) ? res.rows : [];
+
+      if (append){
+        state.lastRows = [...state.lastRows, ...rows];
+      } else {
+        state.lastRows = rows;
+      }
+
+      // actualizar cursor para "cargar más"
+      if (rows.length > 0){
+        state.cursorAfter = rows[rows.length - 1].$id;
+        $('#kpiCursor').textContent = state.cursorAfter || '—';
+      } else if (!append){
+        state.cursorAfter = null;
+        $('#kpiCursor').textContent = '—';
+      }
+
+      renderRows(state.lastRows);
+      $('#kpiCount').textContent = String(state.lastRows.length);
+
+      if (state.lastRows.length === 0){
+        showMsg(listMsg, 'Sin resultados con los filtros actuales.', 'warn');
+      }
+
+    }catch(err){
+      // Fallback automático si falta full-text index para Query.search
+      const msg = explainError(err);
+      const looksLikeIndexIssue =
+        /index|full-text|full text|FTS|missing/i.test(msg);
+
+      if (!state.searchFallbackToContains && looksLikeIndexIssue && f.text){
+        state.searchFallbackToContains = true;
+        showMsg(listMsg, 'No hay índices full-text para SEARCH. Se activó fallback a CONTAINS (puede ser más lento).', 'warn');
+        setLoading(false);
+        return runSearch({ reset, append }); // reintenta una vez
+      }
+
+      showMsg(listMsg, msg, 'err');
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  /***********************
+   * RENDER TABLA
+   ***********************/
+  function fmtDate(iso){
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString('es-ES', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+  }
+
+  function fmtMoney(n, moneda){
+    if (n == null || !Number.isFinite(Number(n))) return '—';
+    const m = normalizeStr(moneda) || '';
+    return `${Number(n).toFixed(2)}${m ? ' ' + m : ''}`;
+  }
+
+  function badges(arr, fallback='—'){
+    if (!Array.isArray(arr) || arr.length===0) return `<span class="badge dim">${escapeHtml(fallback)}</span>`;
+    return arr.slice(0, 6).map(v => `<span class="badge">${escapeHtml(v)}</span>`).join('') +
+      (arr.length > 6 ? `<span class="badge dim">+${arr.length-6}</span>` : '');
+  }
+
+  function renderRows(rows){
+    const tb = $('#rowsTbody');
+
+    if (!rows || rows.length === 0){
+      tb.innerHTML = `<tr><td colspan="6" class="muted">Sin datos todavía.</td></tr>`;
+      return;
+    }
+
+    tb.innerHTML = rows.map(r => {
+      const fecha = r.fechaRegistro || r.$createdAt;
+      const codigo = r.codigo || '—';
+      const nombre = r.nombre || '—';
+      const multi = !!r.multiMarcas;
+
+      const marcasHtml = multi
+        ? `<span class="badge ok">MultiMarcas</span>`
+        : badges(r.marcas, 'Sin marcas');
+
+      const clasesHtml = badges(r.clases, 'Sin clases');
+
+      const precio = fmtMoney(r.precio, r.moneda);
+      const empresa = r.empresaFuente || '—';
+
+      return `
+        <tr data-id="${escapeHtml(r.$id)}">
+          <td>${escapeHtml(fmtDate(fecha))}</td>
+          <td>
+            <div style="font-weight:700">${escapeHtml(codigo)}</div>
+            <span class="sub">${escapeHtml(nombre)}</span>
+          </td>
+          <td>
+            <div>${marcasHtml}</div>
+            <div style="margin-top:6px">${clasesHtml}</div>
+          </td>
+          <td>${escapeHtml(precio)}</td>
+          <td>${escapeHtml(empresa)}</td>
+          <td>
+            <div class="actions">
+              <button class="ghost" data-action="view">Ver</button>
+              <button data-action="edit">Editar</button>
+              <button class="ghost" data-action="copy">Copiar</button>
+              <button class="danger" data-action="del">Eliminar</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    // acciones
+    $$('#rowsTbody tr').forEach(tr => {
+      tr.addEventListener('click', async (ev) => {
+        const btn = ev.target.closest('button[data-action]');
+        if (!btn) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        const id = tr.getAttribute('data-id');
+        const row = state.lastRows.find(x => x.$id === id);
+        if (!row) return;
+
+        const action = btn.getAttribute('data-action');
+        if (action === 'view'){
+          openModal(row);
+        } else if (action === 'edit'){
+          fillFormFromRow(row);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (action === 'copy'){
+          const ok = await copyToClipboard(formatRowAsText(row));
+          showMsg($('#listMsg'), ok ? 'Copiado al portapapeles.' : 'No se pudo copiar.', ok ? 'ok' : 'err');
+        } else if (action === 'del'){
+          await deleteRow(row.$id);
+        }
+      });
+    });
+  }
+
+  function formatRowAsText(r){
+    const lines = [];
+    lines.push(`ID: ${r.$id}`);
+    lines.push(`Fecha: ${r.fechaRegistro || r.$createdAt || ''}`);
+    lines.push(`Empresa fuente: ${r.empresaFuente || ''}`);
+    lines.push(`Código: ${r.codigo || ''}`);
+    lines.push(`Nombre: ${r.nombre || ''}`);
+    lines.push(`Categoría: ${r.categoria || ''}`);
+    lines.push(`MultiMarcas: ${r.multiMarcas ? 'Sí' : 'No'}`);
+    lines.push(`Marcas: ${(Array.isArray(r.marcas) ? r.marcas.join(', ') : '')}`);
+    lines.push(`Clases: ${(Array.isArray(r.clases) ? r.clases.join(', ') : '')}`);
+    lines.push(`Compatibilidad: ${r.compatibilidad || ''}`);
+    lines.push(`Costo: ${r.costo ?? ''} ${r.moneda || ''}`.trim());
+    lines.push(`Precio: ${r.precio ?? ''} ${r.moneda || ''}`.trim());
+    lines.push(`Notas: ${r.notas || ''}`);
+    return lines.join('\n');
+  }
+
+  /***********************
+   * MODAL
+   ***********************/
+  function openModal(row){
+    state.lastModalRow = row;
+    $('#mTitle').textContent = `${row.codigo || '—'} — ${row.nombre || '—'}`;
+    $('#mSub').textContent = `ID: ${row.$id} · Fecha: ${fmtDate(row.fechaRegistro || row.$createdAt)}`;
+
+    const kv = (k, v) => `
+      <div class="kv">
+        <b>${escapeHtml(k)}</b>
+        <div>${v ? v : '<span class="muted">—</span>'}</div>
+      </div>
+    `;
+
+    const marcas = row.multiMarcas ? '<span class="badge ok">MultiMarcas</span>' : badges(row.marcas, 'Sin marcas');
+    const clases = badges(row.clases, 'Sin clases');
+
+    const body = [
+      kv('Empresa fuente', escapeHtml(row.empresaFuente || '')),
+      kv('Categoría', escapeHtml(row.categoria || '')),
+      kv('Marcas', marcas),
+      kv('Clases', clases),
+      kv('Compatibilidad', escapeHtml(row.compatibilidad || '')),
+      kv('Costo', escapeHtml(fmtMoney(row.costo, row.moneda))),
+      kv('Precio', escapeHtml(fmtMoney(row.precio, row.moneda))),
+      kv('Moneda', escapeHtml(row.moneda || '')),
+      kv('Notas', escapeHtml(row.notas || ''))
+    ].join('');
+
+    $('#mBody').innerHTML = body;
+    $('#overlay').style.display = 'flex';
+  }
+
+  function closeModal(){
+    $('#overlay').style.display = 'none';
+    state.lastModalRow = null;
+  }
+
+  /***********************
+   * AUTH
+   ***********************/
+  async function signup(){
+    const email = normalizeStr($('#authEmail').value);
+    const pass  = normalizeStr($('#authPass').value);
+    const name  = normalizeStr($('#authName').value);
+
+    if (!email || !pass){
+      showMsg($('#authMsg'), 'Correo y contraseña son necesarios para crear la cuenta.', 'warn');
+      return;
+    }
+
+    try{
+      setLoading(true);
+      hideMsg($('#authMsg'));
+
+      // Create account  [oai_citation:12‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/account)
+      await account.create({
+        userId: ID.unique(),
+        email,
+        password: pass,
+        name: name || undefined
+      });
+
+      // Login  [oai_citation:13‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/account)
+      await account.createEmailPasswordSession({ email, password: pass });
+
+      await boot();
+      showMsg($('#authMsg'), 'Cuenta creada e inicio de sesión correcto.', 'ok');
+    }catch(err){
+      showMsg($('#authMsg'), explainError(err), 'err');
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  async function login(){
+    const email = normalizeStr($('#authEmail').value);
+    const pass  = normalizeStr($('#authPass').value);
+
+    if (!email || !pass){
+      showMsg($('#authMsg'), 'Ingresa correo y contraseña.', 'warn');
+      return;
+    }
+
+    try{
+      setLoading(true);
+      hideMsg($('#authMsg'));
+
+      // Login  [oai_citation:14‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/account)
+      await account.createEmailPasswordSession({ email, password: pass });
+      await boot();
+    }catch(err){
+      showMsg($('#authMsg'), explainError(err), 'err');
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  async function logout(){
+    try{
+      setLoading(true);
+      // Delete session  [oai_citation:15‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/account)
+      await account.deleteSession({ sessionId: 'current' });
+      state.user = null;
+      $('#appGrid').classList.add('hidden');
+      $('#authCard').classList.remove('hidden');
+      $('#btnLogout').classList.add('hidden');
+      setPill('Sesión cerrada.', 'warn');
+    }catch(err){
+      showMsg($('#listMsg'), explainError(err), 'err');
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  /***********************
+   * BOOT
+   ***********************/
+  async function boot(){
+    // validar config mínima
+    if (
+      APPWRITE_ENDPOINT.includes('<REGION>') ||
+      APPWRITE_PROJECT_ID.includes('<') ||
+      APPWRITE_DATABASE_ID.includes('<') ||
+      APPWRITE_TABLE_ID.includes('<')
+    ){
+      setPill('Config incompleta: edita ENDPOINT/IDs en el HTML.', 'warn');
+      showMsg($('#authMsg'), 'Edita APPWRITE_ENDPOINT/PROJECT_ID/DATABASE_ID/TABLE_ID dentro del HTML.', 'warn');
+      return;
+    }
+
+    try{
+      setLoading(true);
+      setPill('Verificando sesión…');
+
+      // get account  [oai_citation:16‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/account)
+      state.user = await account.get();
+
+      $('#authCard').classList.add('hidden');
+      $('#appGrid').classList.remove('hidden');
+      $('#btnLogout').classList.remove('hidden');
+      setPill(`Conectado: ${state.user.email}`, 'ok');
+
+      renderAllChecklists();
+      resetForm();
+      resetFilters();
+
+      await runSearch({ reset: true });
+
+    }catch(err){
+      state.user = null;
+      $('#authCard').classList.remove('hidden');
+      $('#appGrid').classList.add('hidden');
+      $('#btnLogout').classList.add('hidden');
+      setPill('No hay sesión activa. Inicia sesión.', 'warn');
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  function setLoading(v){
+    state.loading = !!v;
+    $('#btnSave').disabled = v;
+    $('#btnSearch').disabled = v;
+    $('#btnMore').disabled = v;
+    $('#btnSync').disabled = v;
+    $('#btnLogin').disabled = v;
+    $('#btnSignup').disabled = v;
+    $('#btnLogout').disabled = v;
+  }
+
+  function explainError(err){
+    // Intento de error humano
+    if (!err) return 'Error desconocido.';
+    if (typeof err === 'string') return err;
+    if (err.message) return err.message;
+    try{ return JSON.stringify(err); }catch{ return 'Error desconocido.'; }
+  }
+
+  /***********************
+   * EVENTOS
+   ***********************/
+  function wireEvents(){
+    // auth
+    $('#btnLogin').addEventListener('click', login);
+    $('#btnSignup').addEventListener('click', signup);
+    $('#btnLogout').addEventListener('click', logout);
+
+    // form
+    $('#btnSave').addEventListener('click', saveRow);
+    $('#btnClearForm').addEventListener('click', resetForm);
+
+    $('#fCosto').addEventListener('input', updateMargenHint);
+    $('#fPrecio').addEventListener('input', updateMargenHint);
+
+    $('#fMultiMarcas').addEventListener('change', () => {
+      updateMultiMarcasDisabling();
+    });
+
+    // add brand/class
+    $('#btnAddBrand').addEventListener('click', () => {
+      const v = normalizeStr($('#brandCustom').value);
+      if (!v) return;
+      if (!state.brands.includes(v)) state.brands.push(v);
+      state.brands = uniq(state.brands);
+      saveLocalList('brands', state.brands);
+      $('#brandCustom').value = '';
+      renderAllChecklists();
+      updateMultiMarcasDisabling();
+    });
+
+    $('#btnAddClass').addEventListener('click', () => {
+      const v = normalizeStr($('#classCustom').value);
+      if (!v) return;
+      if (!state.classes.includes(v)) state.classes.push(v);
+      state.classes = uniq(state.classes);
+      saveLocalList('classes', state.classes);
+      $('#classCustom').value = '';
+      renderAllChecklists();
+    });
+
+    // search
+    $('#btnSearch').addEventListener('click', () => runSearch({ reset: true }));
+    $('#btnClearFilters').addEventListener('click', () => {
+      resetFilters();
+      hideMsg($('#listMsg'));
+      runSearch({ reset: true });
+    });
+
+    // buscar mientras escribes (debounced)
+    const debouncedSearch = debounce(() => runSearch({ reset: true }), 380);
+    ['qText','qEmpresa','qCategoria','qMinPrice','qMaxPrice','qFromDate','qToDate']
+      .forEach(id => $('#' + id).addEventListener('input', debouncedSearch));
+    ['qOnlyMulti','qIncludeMulti']
+      .forEach(id => $('#' + id).addEventListener('change', debouncedSearch));
+
+    // cambios en checklists de filtro
+    $('#brandsFilter').addEventListener('change', debouncedSearch);
+    $('#classesFilter').addEventListener('change', debouncedSearch);
+
+    // cargar más
+    $('#btnMore').addEventListener('click', () => runSearch({ append: true }));
+
+    // sync
+    $('#btnSync').addEventListener('click', async () => {
+      await runSearch({ reset: true });
+      showMsg($('#listMsg'), 'Lista sincronizada.', 'ok');
+    });
+
+    // modal
+    $('#btnCloseModal').addEventListener('click', closeModal);
+    $('#overlay').addEventListener('click', (e) => {
+      if (e.target.id === 'overlay') closeModal();
+    });
+    $('#btnEditFromModal').addEventListener('click', () => {
+      if (!state.lastModalRow) return;
+      fillFormFromRow(state.lastModalRow);
+      closeModal();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  /***********************
+   * INIT
+   ***********************/
+  wireEvents();
+  renderAllChecklists();
+  boot();
+  </script>
+</body>
+</html>
