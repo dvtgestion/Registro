@@ -552,11 +552,14 @@ if (!window.Appwrite) missing.push('Appwrite');
 else {
   if (!window.Appwrite.Client)  missing.push('Client');
   if (!window.Appwrite.Account) missing.push('Account');
-  if (!window.Appwrite.TablesDB) missing.push('TablesDB');
+  if (!window.Appwrite.Databases) missing.push('Databases');
 }
 
 if (pill) pill.textContent = missing.length ? `Falta: ${missing.join(', ')}` : 'SDK OK';
 </script>
+
+<!-- AQUI você abre outro script para TODO o resto -->
+<script>
   /***********************
    * CONFIGURACIÓN (EDITA)
    ***********************/
@@ -660,7 +663,7 @@ const APPWRITE_TABLE_ID    = 'piezas';
     .setProject(APPWRITE_PROJECT_ID); //  [oai_citation:7‡Appwrite](https://appwrite.io/docs/quick-starts/web)
 
   const account = new Appwrite.Account(client);
-  const tablesDB = new Appwrite.TablesDB(client);
+  const databases = new Appwrite.Databases(client);
   const Query = Appwrite.Query;
   const ID = Appwrite.ID;
 
@@ -928,24 +931,22 @@ const APPWRITE_TABLE_ID    = 'piezas';
       setLoading(true);
 
       if (editingId){
-        // Update row (PATCH)  [oai_citation:8‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/tablesDB)
-        await tablesDB.updateRow({
-          databaseId: APPWRITE_DATABASE_ID,
-          tableId: APPWRITE_TABLE_ID,
-          rowId: editingId,
-          data
-        });
-        showMsg(msg, 'Registro actualizado correctamente.', 'ok');
-      } else {
-        // Create row  [oai_citation:9‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/tablesDB)
-        await tablesDB.createRow({
-          databaseId: APPWRITE_DATABASE_ID,
-          tableId: APPWRITE_TABLE_ID,
-          rowId: ID.unique(),
-          data
-        });
-        showMsg(msg, 'Registro guardado correctamente.', 'ok');
-      }
+  await databases.updateDocument(
+    APPWRITE_DATABASE_ID,
+    APPWRITE_TABLE_ID,
+    editingId,
+    data
+  );
+  showMsg(msg, 'Registro actualizado correctamente.', 'ok');
+} else {
+  await databases.createDocument(
+    APPWRITE_DATABASE_ID,
+    APPWRITE_TABLE_ID,
+    ID.unique(),
+    data
+  );
+  showMsg(msg, 'Registro guardado correctamente.', 'ok');
+}
 
       // refrescar lista
       await runSearch({ reset: true });
@@ -964,11 +965,11 @@ const APPWRITE_TABLE_ID    = 'piezas';
     try{
       setLoading(true);
       // Delete row  [oai_citation:10‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/tablesDB)
-      await tablesDB.deleteRow({
-        databaseId: APPWRITE_DATABASE_ID,
-        tableId: APPWRITE_TABLE_ID,
-        rowId
-      });
+      await databases.deleteDocument(
+  APPWRITE_DATABASE_ID,
+  APPWRITE_TABLE_ID,
+  rowId
+);
       showMsg($('#listMsg'), 'Registro eliminado.', 'ok');
       await runSearch({ reset: true });
     }catch(err){
@@ -1074,14 +1075,13 @@ const APPWRITE_TABLE_ID    = 'piezas';
     try{
       setLoading(true);
 
-      const res = await tablesDB.listRows({
-        databaseId: APPWRITE_DATABASE_ID,
-        tableId: APPWRITE_TABLE_ID,
-        queries,
-        total: false
-      }); //  [oai_citation:11‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/tablesDB)
+      const res = await databases.listDocuments(
+  APPWRITE_DATABASE_ID,
+  APPWRITE_TABLE_ID,
+  queries
+);
 
-      const rows = Array.isArray(res.rows) ? res.rows : [];
+const rows = Array.isArray(res.documents) ? res.documents : [];
 
       if (append){
         state.lastRows = [...state.lastRows, ...rows];
@@ -1256,7 +1256,8 @@ const APPWRITE_TABLE_ID    = 'piezas';
       </div>
     `;
 
-    const marcas = row.multiMarcas ? '<span class="badge ok">MultiMarcas</span>' : badges(row.marcas, 'Sin marcas');
+    const isMulti = Number(row.multiMarcas) === 1;
+const marcas = isMulti ? '<span class="badge ok">MultiMarcas</span>' : badges(row.marcas, 'Sin marcas');
     const clases = badges(row.clases, 'Sin clases');
 
     const body = [
