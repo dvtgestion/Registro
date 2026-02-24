@@ -1284,10 +1284,10 @@ const marcas = isMulti ? '<span class="badge ok">MultiMarcas</span>' : badges(ro
    ***********************/
   async function signup(){
   const email = normalizeStr($('#authEmail').value);
-  const pass  = normalizeStr($('#authPass').value);
-  const name  = normalizeStr($('#authName').value);
+  const password = normalizeStr($('#authPass').value);
+  const name = normalizeStr($('#authName').value);
 
-  if (!email || !pass){
+  if (!email || !password){
     showMsg($('#authMsg'), 'Correo y contraseña son necesarios para crear la cuenta.', 'warn');
     return;
   }
@@ -1296,16 +1296,18 @@ const marcas = isMulti ? '<span class="badge ok">MultiMarcas</span>' : badges(ro
     setLoading(true);
     hideMsg($('#authMsg'));
 
+    // 1) Crear cuenta (CREA el usuario en Appwrite)
     await account.create({
       userId: ID.unique(),
       email,
-      password: pass,
+      password,
       name: name || undefined
     });
 
+    // 2) Iniciar sesión
     await account.createEmailPasswordSession({
       email,
-      password: pass
+      password
     });
 
     await boot();
@@ -1319,9 +1321,9 @@ const marcas = isMulti ? '<span class="badge ok">MultiMarcas</span>' : badges(ro
 
 async function login(){
   const email = normalizeStr($('#authEmail').value);
-  const pass  = normalizeStr($('#authPass').value);
+  const password = normalizeStr($('#authPass').value);
 
-  if (!email || !pass){
+  if (!email || !password){
     showMsg($('#authMsg'), 'Ingresa correo y contraseña.', 'warn');
     return;
   }
@@ -1332,7 +1334,7 @@ async function login(){
 
     await account.createEmailPasswordSession({
       email,
-      password: pass
+      password
     });
 
     await boot();
@@ -1346,7 +1348,11 @@ async function login(){
 async function logout(){
   try{
     setLoading(true);
-    await account.deleteSession({ sessionId: 'current' });
+
+    await account.deleteSession({
+      sessionId: 'current'
+    });
+
     state.user = null;
     $('#appGrid').classList.add('hidden');
     $('#authCard').classList.remove('hidden');
