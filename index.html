@@ -544,6 +544,15 @@
   <script src="https://cdn.jsdelivr.net/npm/appwrite@17.0.0"></script> <!--  [oai_citation:6‡Appwrite](https://appwrite.io/docs/quick-starts/web) -->
   <script>
   'use strict';
+  
+  // TESTE RÁPIDO: se isto não mudar o topo, seu JS não está rodando
+const __pill = document.getElementById('pillStatus');
+if (__pill) __pill.textContent = 'JS cargado…';
+
+window.addEventListener('error', (e) => {
+  const msg = e?.message || 'Error JS';
+  if (__pill) __pill.textContent = `Error JS: ${msg}`;
+});
 
   /***********************
    * CONFIGURACIÓN (EDITA)
