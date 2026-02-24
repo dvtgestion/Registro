@@ -761,7 +761,7 @@ const APPWRITE_TABLE_ID    = 'piezas';
     $('#fCosto').value = row.costo ?? '';
     $('#fPrecio').value = row.precio ?? '';
     $('#fMoneda').value = row.moneda ?? '';
-    $('#fMultiMarcas').checked = !!row.multiMarcas;
+    $('#fMultiMarcas').checked = Number(row.multiMarcas) === 1;
     $('#fCompat').value = row.compatibilidad ?? '';
     $('#fNotas').value = row.notas ?? '';
 
@@ -817,7 +817,7 @@ const APPWRITE_TABLE_ID    = 'piezas';
       costo,
       precio,
       moneda: normalizeStr($('#fMoneda').value) || null,
-      multiMarcas: !!multi,
+      multiMarcas: multi ? 1 : 0,
       marcas: marcasSel,
       clases: clasesSel,
       compatibilidad: normalizeStr($('#fCompat').value) || null,
@@ -1033,13 +1033,13 @@ const APPWRITE_TABLE_ID    = 'piezas';
 
     // MultiMarcas
     if (f.onlyMulti){
-      queries.push(Query.equal('multiMarcas', true));
+      queries.push(Query.equal('multiMarcas', 1));
     }
 
     // Marcas (OR) + incluir MultiMarcas (opcional)
     const marcasQ = buildOrContainsArray('marcas', f.marcas);
     if (marcasQ && f.includeMulti && !f.onlyMulti){
-      queries.push(Query.or([marcasQ, Query.equal('multiMarcas', true)]));
+      queries.push(Query.or([marcasQ, Query.equal('multiMarcas', 1)]));
     } else if (marcasQ){
       queries.push(marcasQ);
     }
@@ -1122,11 +1122,12 @@ const APPWRITE_TABLE_ID    = 'piezas';
     return d.toLocaleString('es-ES', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
   }
 
-  function fmtMoney(n, moneda){
-    if (n == null || !Number.isFinite(Number(n))) return '—';
-    const m = normalizeStr(moneda) || '';
-    return `${Number(n).toFixed(2)}${m ? ' ' + m : ''}`;
-  }
+  function fmtMoney(cents, moneda){
+  if (cents == null || !Number.isFinite(Number(cents))) return '—';
+  const m = normalizeStr(moneda) || '';
+  const value = Number(cents) / 100; // centavos -> valor
+  return `${value.toFixed(2)}${m ? ' ' + m : ''}`;
+}
 
   function badges(arr, fallback='—'){
     if (!Array.isArray(arr) || arr.length===0) return `<span class="badge dim">${escapeHtml(fallback)}</span>`;
@@ -1146,7 +1147,7 @@ const APPWRITE_TABLE_ID    = 'piezas';
       const fecha = r.fechaRegistro || r.$createdAt;
       const codigo = r.codigo || '—';
       const nombre = r.nombre || '—';
-      const multi = !!r.multiMarcas;
+      const multi = Number(r.multiMarcas) === 1;
 
       const marcasHtml = multi
         ? `<span class="badge ok">MultiMarcas</span>`
