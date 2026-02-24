@@ -1299,15 +1299,14 @@ const marcas = isMulti ? '<span class="badge ok">MultiMarcas</span>' : badges(ro
       hideMsg($('#authMsg'));
 
       // Create account  [oai_citation:12‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/account)
-      await account.create({
-        userId: ID.unique(),
-        email,
-        password: pass,
-        name: name || undefined
-      });
+      await account.create(
+  ID.unique(),
+  email,
+  pass,
+  name || undefined
+);
 
-      // Login  [oai_citation:13‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/account)
-      await account.createEmailPasswordSession({ email, password: pass });
+await account.createEmailPasswordSession(email, pass);
 
       await boot();
       showMsg($('#authMsg'), 'Cuenta creada e inicio de sesión correcto.', 'ok');
@@ -1332,7 +1331,7 @@ const marcas = isMulti ? '<span class="badge ok">MultiMarcas</span>' : badges(ro
       hideMsg($('#authMsg'));
 
       // Login  [oai_citation:14‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/account)
-      await account.createEmailPasswordSession({ email, password: pass });
+      await account.createEmailPasswordSession(email, pass);
       await boot();
     }catch(err){
       showMsg($('#authMsg'), explainError(err), 'err');
@@ -1345,7 +1344,7 @@ const marcas = isMulti ? '<span class="badge ok">MultiMarcas</span>' : badges(ro
     try{
       setLoading(true);
       // Delete session  [oai_citation:15‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/account)
-      await account.deleteSession({ sessionId: 'current' });
+      await account.deleteSession('current');
       state.user = null;
       $('#appGrid').classList.add('hidden');
       $('#authCard').classList.remove('hidden');
