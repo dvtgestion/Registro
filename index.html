@@ -922,54 +922,52 @@ const APPWRITE_TABLE_ID    = 'piezas';
     const data = getFormData();
 
     // Limpieza: Appwrite acepta null/arrays, pero evitamos strings vacíos
-    // (si prefieres strings vacíos, quita este bloque)
-    Object.keys(data).forEach(k => {
-      if (data[k] === '') data[k] = null;
+Object.keys(data).forEach(k => {
+  if (data[k] === '') data[k] = null;
+});
+
+try{
+  setLoading(true);
+
+  if (editingId) {
+    await databases.updateDocument({
+      databaseId: APPWRITE_DATABASE_ID,
+      collectionId: APPWRITE_TABLE_ID, // "piezas"
+      documentId: editingId,
+      data
     });
-
-    try{
-      setLoading(true);
-
-      if (editingId){
-  await databases.updateDocument(
-    APPWRITE_DATABASE_ID,
-    APPWRITE_TABLE_ID,
-    editingId,
-    data
-  );
-  showMsg(msg, 'Registro actualizado correctamente.', 'ok');
-} else {
-  await databases.createDocument(
-    APPWRITE_DATABASE_ID,
-    APPWRITE_TABLE_ID,
-    ID.unique(),
-    data
-  );
-  showMsg(msg, 'Registro guardado correctamente.', 'ok');
-}
-
-      // refrescar lista
-      await runSearch({ reset: true });
-      // limpiar form
-      resetForm();
-
-    }catch(err){
-      showMsg(msg, explainError(err), 'err');
-    }finally{
-      setLoading(false);
-    }
+    showMsg(msg, 'Registro actualizado correctamente.', 'ok');
+  } else {
+    await databases.createDocument({
+      databaseId: APPWRITE_DATABASE_ID,
+      collectionId: APPWRITE_TABLE_ID, // "piezas"
+      documentId: ID.unique(),
+      data
+    });
+    showMsg(msg, 'Registro guardado correctamente.', 'ok');
   }
 
+  // refrescar lista
+  await runSearch({ reset: true });
+  // limpiar form
+  resetForm();
+
+ } catch (err) {
+    showMsg(msg, explainError(err), 'err');
+  } finally {
+    setLoading(false);
+  }
+} // <-- FECHA saveRow AQUI
   async function deleteRow(rowId){
     if (!confirm('¿Eliminar este registro?')) return;
     try{
       setLoading(true);
       // Delete row  [oai_citation:10‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/tablesDB)
-      await databases.deleteDocument(
-  APPWRITE_DATABASE_ID,
-  APPWRITE_TABLE_ID,
-  rowId
-);
+      await databases.deleteDocument({
+  databaseId: APPWRITE_DATABASE_ID,
+  collectionId: APPWRITE_TABLE_ID, // "piezas"
+  documentId: rowId
+});
       showMsg($('#listMsg'), 'Registro eliminado.', 'ok');
       await runSearch({ reset: true });
     }catch(err){
@@ -1285,37 +1283,81 @@ const marcas = isMulti ? '<span class="badge ok">MultiMarcas</span>' : badges(ro
    * AUTH
    ***********************/
   async function signup(){
-    const email = normalizeStr($('#authEmail').value);
-    const pass  = normalizeStr($('#authPass').value);
-    const name  = normalizeStr($('#authName').value);
+  const email = normalizeStr($('#authEmail').value);
+  const pass  = normalizeStr($('#authPass').value);
+  const name  = normalizeStr($('#authName').value);
 
-    if (!email || !pass){
-      showMsg($('#authMsg'), 'Correo y contraseña son necesarios para crear la cuenta.', 'warn');
-      return;
-    }
-
-    try{
-      setLoading(true);
-      hideMsg($('#authMsg'));
-
-      // Create account  [oai_citation:12‡Appwrite](https://appwrite.io/docs/references/cloud/client-web/account)
-      await account.create(
-  ID.unique(),
-  email,
-  pass,
-  name || undefined
-);
-
-await account.createEmailPasswordSession(email, pass);
-
-      await boot();
-      showMsg($('#authMsg'), 'Cuenta creada e inicio de sesión correcto.', 'ok');
-    }catch(err){
-      showMsg($('#authMsg'), explainError(err), 'err');
-    }finally{
-      setLoading(false);
-    }
+  if (!email || !pass){
+    showMsg($('#authMsg'), 'Correo y contraseña son necesarios para crear la cuenta.', 'warn');
+    return;
   }
+
+  try{
+    setLoading(true);
+    hideMsg($('#authMsg'));
+
+    await account.create({
+      userId: ID.unique(),
+      email,
+      password: pass,
+      name: name || undefined
+    });
+
+    await account.createEmailPasswordSession({
+      email,
+      password: pass
+    });
+
+    await boot();
+    showMsg($('#authMsg'), 'Cuenta creada e inicio de sesión correcto.', 'ok');
+  }catch(err){
+    showMsg($('#authMsg'), explainError(err), 'err');
+  }finally{
+    setLoading(false);
+  }
+}
+
+async function login(){
+  const email = normalizeStr($('#authEmail').value);
+  const pass  = normalizeStr($('#authPass').value);
+
+  if (!email || !pass){
+    showMsg($('#authMsg'), 'Ingresa correo y contraseña.', 'warn');
+    return;
+  }
+
+  try{
+    setLoading(true);
+    hideMsg($('#authMsg'));
+
+    await account.createEmailPasswordSession({
+      email,
+      password: pass
+    });
+
+    await boot();
+  }catch(err){
+    showMsg($('#authMsg'), explainError(err), 'err');
+  }finally{
+    setLoading(false);
+  }
+}
+
+async function logout(){
+  try{
+    setLoading(true);
+    await account.deleteSession({ sessionId: 'current' });
+    state.user = null;
+    $('#appGrid').classList.add('hidden');
+    $('#authCard').classList.remove('hidden');
+    $('#btnLogout').classList.add('hidden');
+    setPill('Sesión cerrada.', 'warn');
+  }catch(err){
+    showMsg($('#listMsg'), explainError(err), 'err');
+  }finally{
+    setLoading(false);
+  }
+}
 
   async function login(){
     const email = normalizeStr($('#authEmail').value);
